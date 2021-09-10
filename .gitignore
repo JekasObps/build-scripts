@@ -2,8 +2,7 @@
 *
 
 # except dirs:
-# --
-
+!scripts
 
 # include cmake files
 !**.cmake
