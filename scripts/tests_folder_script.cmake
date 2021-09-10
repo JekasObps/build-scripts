@@ -1,19 +1,33 @@
 ################
 ### TESTING: ###
 ################
-macro(CHECK_IF_TEST_ENABLED result)
+function(CHECK_IF_TEST_ENABLED result)
     list(FIND TEST_TARGETS ${PROJECT_NAME} test_enabled)
     if (test_enabled EQUAL -1)
-        set(${result} False)
+        set(${result} False PARENT_SCOPE)
         message(STATUS "Skipping \"${PROJECT_NAME}\" test.")
     else()
-        set(${result} True)
+        set(${result} True PARENT_SCOPE)
         message(STATUS "Listed \"${PROJECT_NAME}\" test.")
     endif()
-endmacro()
+endfunction()
 
-function(setup_testing)
-    CHECK_IF_TEST_ENABLED(test_enabled)
+# testing effectiveness of configuration flags on the build
+function(CONFIGURATION_TEST test source flags link_libs expected)
+    add_executable(${test} ${source})
+    set_target_properties(${test} PROPERTIES CXX_STANDARD 20)
+    target_compile_options(${test} PUBLIC ${flags})
+    target_link_libraries(${test} ${link_libs})
+
+    add_test(NAME ${test} COMMAND ${test})
+
+    set_tests_properties(${test} PROPERTIES 
+        PASS_REGULAR_EXPRESSION ${expected}
+    ) 
+endfunction()
+
+function(SETUP_TESTING)
+    check_if_test_enabled(test_enabled)
     if (test_enabled)
         message(STATUS "Testing \"${PROJECT_NAME}\"")
 
