@@ -10,12 +10,17 @@ function(CHECK_IF_TEST_ENABLED result)
         set(${result} True PARENT_SCOPE)
         message(STATUS "Listed \"${PROJECT_NAME}\" test.")
     endif()
-endfunction()
+endfunction(CHECK_IF_TEST_ENABLED)
+
+
+function(INCLUDE_GTEST)
+    FetchContent_MakeAvailable(googletest)
+endfunction(INCLUDE_GTEST)
+
 
 # testing effectiveness of configuration flags on the build
 function(CONFIGURATION_TEST test source flags link_libs expected)
     add_executable(${test} ${source})
-    set_target_properties(${test} PROPERTIES CXX_STANDARD 20)
     target_compile_options(${test} PUBLIC ${flags})
     target_link_libraries(${test} ${link_libs})
 
@@ -24,8 +29,10 @@ function(CONFIGURATION_TEST test source flags link_libs expected)
     set_tests_properties(${test} PROPERTIES 
         PASS_REGULAR_EXPRESSION ${expected}
     ) 
-endfunction()
+endfunction(CONFIGURATION_TEST)
 
+
+# call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
     check_if_test_enabled(test_enabled)
     if (test_enabled)
@@ -58,4 +65,4 @@ function(SETUP_TESTING)
         endif()
         
     endif() # test_enabled
-endfunction() # setup_testing
+endfunction(SETUP_TESTING)
