@@ -13,6 +13,7 @@ function(CHECK_IF_TEST_ENABLED result)
 endfunction(CHECK_IF_TEST_ENABLED)
 
 
+# populates gdest declared in fetch_googletest.cmake
 function(IMPORT_GTEST)
     FetchContent_MakeAvailable(googletest)
 endfunction(IMPORT_GTEST)
