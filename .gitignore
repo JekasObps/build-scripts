@@ -1,0 +1,13 @@
+# exclude all
+*
+
+# except dirs:
+# --
+
+
+# include cmake files
+!**.cmake
+!**/CMakeLists.txt
+
+# 
+!.gitignore
