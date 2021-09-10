@@ -13,9 +13,9 @@ function(CHECK_IF_TEST_ENABLED result)
 endfunction(CHECK_IF_TEST_ENABLED)
 
 
-function(INCLUDE_GTEST)
+function(IMPORT_GTEST)
     FetchContent_MakeAvailable(googletest)
-endfunction(INCLUDE_GTEST)
+endfunction(IMPORT_GTEST)
 
 
 # testing effectiveness of configuration flags on the build
