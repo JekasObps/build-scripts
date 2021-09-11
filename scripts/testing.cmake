@@ -33,6 +33,24 @@ function(CONFIGURATION_TEST test source flags link_libs expected)
 endfunction(CONFIGURATION_TEST)
 
 
+# define testing targets
+function(SET_TEST_TARGETS targets...)
+    foreach(arg ${argv})
+        list(APPEND test_targets ${arg})
+    endforeach()
+    set(${PROJECT_NAME}_TEST_TARGETS ${test_targets} PARENT_SCOPE) 
+endfunction(TEST_TARGETS)
+
+
+# define testing targets for subprojects
+function(SET_SUBPROJECT_TEST_TARGETS subproject targets...)
+    foreach(arg ${argv})
+        list(APPEND test_targets ${arg})
+    endforeach()
+    set(${subproject}_TEST_TARGETS ${test_targets} PARENT_SCOPE) 
+endfunction(TEST_TARGETS)
+
+
 # call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
     check_if_test_enabled(test_enabled)
