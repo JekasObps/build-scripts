@@ -94,7 +94,7 @@ endfunction(SETUP_TESTING)
 
 function(CHECK_IF_TEST_ENABLED result)
     if(TEST_ALL OR ${PROJECT_NAME}_TEST_ALL)
-        return True
+        set(${result} True PARENT_SCOPE)
     endif()
 
     list(FIND ${PROJECT_NAME}_TEST_TARGETS ${PROJECT_NAME} test_enabled)
