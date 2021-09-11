@@ -1,17 +1,6 @@
 ################
 ### TESTING: ###
 ################
-function(CHECK_IF_TEST_ENABLED result)
-    list(FIND TEST_TARGETS ${PROJECT_NAME} test_enabled)
-    if (test_enabled EQUAL -1)
-        set(${result} False PARENT_SCOPE)
-        message(STATUS "Skipping \"${PROJECT_NAME}\" test.")
-    else()
-        set(${result} True PARENT_SCOPE)
-        message(STATUS "Listed \"${PROJECT_NAME}\" test.")
-    endif()
-endfunction(CHECK_IF_TEST_ENABLED)
-
 
 # populates gdest declared in fetch_googletest.cmake
 function(IMPORT_GTEST)
@@ -35,7 +24,15 @@ endfunction(CONFIGURATION_TEST)
 
 # define testing targets
 function(SET_TEST_TARGETS targets...)
-    SET_SUBPROJECT_TEST_TARGETS(PROJECT_NAME targets...)
+    if(${PROJECT_NAME}_TEST_TARGETS)
+        if(${PROJECT_NAME}_MAIN_PROJECT)
+            message(FATAL_ERROR "main project test targets may not be overridden!")
+        else()
+            message(STATUS "testing targets were overridden! :\n    targets: ${${PROJECT_NAME}_TEST_TARGETS}")
+        endif()
+    else()
+        SET_SUBPROJECT_TEST_TARGETS(PROJECT_NAME targets...)
+    endif()
 endfunction(TEST_TARGETS)
 
 
@@ -48,9 +45,20 @@ function(SET_SUBPROJECT_TEST_TARGETS subproject targets...)
 endfunction(TEST_TARGETS)
 
 
+function(SET_TEST_ALL)
+    set(TEST_ALL ON PARENT_SCOPE)
+endfunction(SET_TEST_ALL)
+
+
+function(SET_SUBPROJECT_TEST_ALL subproject)
+    set(${subproject}_TEST_ALL ON PARENT_SCOPE)
+endfunction()
+
+
 # call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
     check_if_test_enabled(test_enabled)
+
     if (test_enabled)
         message(STATUS "Testing \"${PROJECT_NAME}\"")
 
@@ -82,3 +90,19 @@ function(SETUP_TESTING)
         
     endif() # test_enabled
 endfunction(SETUP_TESTING)
+
+
+function(CHECK_IF_TEST_ENABLED result)
+    if(TEST_ALL OR ${PROJECT_NAME}_TEST_ALL)
+        return True
+    endif()
+
+    list(FIND ${PROJECT_NAME}_TEST_TARGETS ${PROJECT_NAME} test_enabled)
+    if(test_enabled EQUAL -1)
+        set(${result} False PARENT_SCOPE)
+        message(STATUS "Skipping \"${PROJECT_NAME}\" test.")
+    else()
+        set(${result} True PARENT_SCOPE)
+        message(STATUS "Listed \"${PROJECT_NAME}\" test.")
+    endif()
+endfunction(CHECK_IF_TEST_ENABLED)
