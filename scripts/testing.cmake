@@ -22,87 +22,105 @@ function(CONFIGURATION_TEST test source flags link_libs expected)
 endfunction(CONFIGURATION_TEST)
 
 
-# define testing targets
-function(SET_TEST_TARGETS targets...)
-    if(${PROJECT_NAME}_TEST_TARGETS)
-        if(${PROJECT_NAME}_MAIN_PROJECT)
-            message(FATAL_ERROR "main project test targets may not be overridden!")
+function(ENABLE_ALL_TESTS)
+    set(TEST_ALL ON PARENT_SCOPE)
+endfunction(ENABLE_ALL_TESTS)
+
+
+function(ENABLE_TESTS)
+    __ENABLE_PROJECT_TESTS(${PROJECT_NAME}, ${ARGN})
+endfunction(ENABLE_TESTS)
+
+
+function(ENABLE_SUBPROJECT_TESTS subproject)
+    __ENABLE_PROJECT_TESTS(${subproject} ${ARGN})
+endfunction(ENABLE_SUBPROJECT_TESTS)
+
+
+macro(__ENABLE_PROJECT_TESTS project tests)
+    if(${project}_TESTS)
+        if(${project}_MAIN_PROJECT)
+            message(FATAL_ERROR "Main project test targets may not be overridden!")
         else()
-            message(STATUS "testing targets were overridden! :\n    targets: ${${PROJECT_NAME}_TEST_TARGETS}")
+            message(STATUS "Testing targets were overridden! :\n    targets: ${${project}_TESTS}")
         endif()
     else()
-        SET_SUBPROJECT_TEST_TARGETS(PROJECT_NAME targets...)
+        __ENABLE_TESTS(${project} ${tests} ${project}_TESTS)
+        message("${project}_TESTS")
     endif()
-endfunction(TEST_TARGETS)
+endmacro(__ENABLE_PROJECT_TESTS)
 
 
-# define testing targets for subprojects
-function(SET_SUBPROJECT_TEST_TARGETS subproject targets...)
-    foreach(arg ${argv})
-        list(APPEND test_targets ${arg})
-    endforeach()
-    set(${subproject}_TEST_TARGETS ${test_targets} PARENT_SCOPE) 
-endfunction(TEST_TARGETS)
-
-
-function(SET_TEST_ALL)
-    set(TEST_ALL ON PARENT_SCOPE)
-endfunction(SET_TEST_ALL)
-
-
-function(SET_SUBPROJECT_TEST_ALL subproject)
-    set(${subproject}_TEST_ALL ON PARENT_SCOPE)
-endfunction()
+macro(__ENABLE_TESTS project tests result)
+    list(APPEND test_targets ${tests})
+    set(${result} ${test_targets} PARENT_SCOPE)
+endmacro(__ENABLE_TESTS)
 
 
 # call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
-    check_if_test_enabled(test_enabled)
+    CHECK_PROJECT_TEST_ENABLED(project_test_all)
 
-    if (test_enabled)
-        message(STATUS "Testing \"${PROJECT_NAME}\"")
+    # collecting tests 
+    file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+    
+    if(project_test_all)
+        message(STATUS "\"${PROJECT_NAME}\"  ALL TESTS   ")
+    endif()
 
-        # collecting tests 
-        file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-        
-        include(GoogleTest)
-        
-        foreach(test_source ${test_sources})
-            cmake_path(GET test_source FILENAME test_name)
-            list(APPEND test_targets ${test_name})
+    foreach(test_source ${test_sources})
+        cmake_path(GET test_source FILENAME test_name)
 
-            add_executable(${test_name} ${test_source})
-            
-            target_link_libraries(${test_name} 
-                PRIVATE ${PROJECT_NAME}
-                PRIVATE gtest_main
-            )
-            
-            set_target_properties(${test_name} PROPERTIES CXX_STANDARD 20)
-            add_test(NAME ${test_name} COMMAND ${test_name})
-
-            gtest_discover_tests(${test_name})
-        endforeach()
-
-        if (NOT test_sources)
-            message(STATUS "${PROJECT_NAME} tests not found!")
+        if(NOT project_test_all)
+            CHECK_TEST_ENABLED(${test_name} test_enabled)
+            if(test_enabled)
+                __TEST_SOURCE()
+                message(STATUS "Listed \"${PROJECT_NAME}\" test.")
+            else()
+                message(STATUS "Skipping \"${PROJECT_NAME}\" test.")
+            endif()
+        else()
+            __TEST_SOURCE()
         endif()
-        
-    endif() # test_enabled
+    endforeach()
+
 endfunction(SETUP_TESTING)
 
 
-function(CHECK_IF_TEST_ENABLED result)
-    if(TEST_ALL OR ${PROJECT_NAME}_TEST_ALL)
-        set(${result} True PARENT_SCOPE)
-    endif()
+macro(__TEST_SOURCE)
+    include(GoogleTest)
+    
+    add_executable(${test_name} ${test_source})
+    target_link_libraries(${test_name} 
+        PRIVATE ${PROJECT_NAME}
+        PRIVATE gtest_main
+    )
 
-    list(FIND ${PROJECT_NAME}_TEST_TARGETS ${PROJECT_NAME} test_enabled)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+
+    gtest_discover_tests(${test_name})
+endmacro(__TEST_SOURCE)
+
+
+function(CHECK_TEST_ENABLED test result)
+    list(FIND ${PROJECT_NAME}_TEST_TARGETS ${test} test_enabled)
     if(test_enabled EQUAL -1)
         set(${result} False PARENT_SCOPE)
-        message(STATUS "Skipping \"${PROJECT_NAME}\" test.")
     else()
         set(${result} True PARENT_SCOPE)
-        message(STATUS "Listed \"${PROJECT_NAME}\" test.")
     endif()
-endfunction(CHECK_IF_TEST_ENABLED)
+endfunction(CHECK_TEST_ENABLED)
+
+
+function(CHECK_PROJECT_TEST_ENABLED result)
+    if(TEST_ALL)
+        set(${result} True PARENT_SCOPE)
+    else()
+    list(FIND ${PROJECT_NAME}_TESTS "TEST_ALL" ${result})
+    if(${result} EQUAL -1)
+        set(${result} False PARENT_SCOPE)
+    else()
+        set(${result} True PARENT_SCOPE)
+    endif()
+    endif()
+endfunction(CHECK_PROJECT_TEST_ENABLED)
