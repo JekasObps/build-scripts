@@ -35,10 +35,7 @@ endfunction(CONFIGURATION_TEST)
 
 # define testing targets
 function(SET_TEST_TARGETS targets...)
-    foreach(arg ${argv})
-        list(APPEND test_targets ${arg})
-    endforeach()
-    set(${PROJECT_NAME}_TEST_TARGETS ${test_targets} PARENT_SCOPE) 
+    SET_SUBPROJECT_TEST_TARGETS(PROJECT_NAME targets...)
 endfunction(TEST_TARGETS)
 
 
