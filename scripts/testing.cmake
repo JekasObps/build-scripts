@@ -28,7 +28,7 @@ endfunction(ENABLE_ALL_TESTS)
 
 
 function(ENABLE_TESTS)
-    __ENABLE_PROJECT_TESTS(${PROJECT_NAME}, ${ARGN})
+    __ENABLE_PROJECT_TESTS(${PROJECT_NAME} ${ARGN})
 endfunction(ENABLE_TESTS)
 
 
@@ -46,7 +46,6 @@ macro(__ENABLE_PROJECT_TESTS project tests)
         endif()
     else()
         __ENABLE_TESTS(${project} ${tests} ${project}_TESTS)
-        message("${project}_TESTS")
     endif()
 endmacro(__ENABLE_PROJECT_TESTS)
 
