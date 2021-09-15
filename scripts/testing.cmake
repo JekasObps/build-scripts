@@ -9,29 +9,21 @@ endfunction(IMPORT_GTEST)
 
 
 # testing effectiveness of configuration flags on the build
-function(CONFIGURATION_TEST 
-    TEST test 
-    SOURCE source 
-    FLAGS flags 
-    LINK_LIBS link_libs 
-    EXPECTED expected
-)
-    if ((NOT "TEST" STREQUAL ${TEST}) OR 
-        (NOT "SOURCE" STREQUAL ${SOURCE}) OR 
-        (NOT "FLAGS" STREQUAL ${FLAGS}) OR
-        (NOT "LINK_LIBS" STREQUAL ${LINK_LIBS}) OR 
-        (NOT "EXPECTED" STREQUAL ${EXPECTED}))
-        message(FATAL_ERROR "Wrong arguments have been passed to a function(CONFIGURATION_TEST)")
-    endif()
+function(CONFIGURATION_TEST)
+    set(oneValueArgs TEST SOURCE EXPECTED)
+    set(multiValueArgs FLAGS LINK_LIBS)
+    cmake_parse_arguments(CONFT "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    add_executable(${test} ${source})
-    target_compile_options(${test} PUBLIC ${flags})
-    target_link_libraries(${test} ${link_libs})
+    message(STATUS "Configuration Test: ${CONFT_TEST}")
+    add_executable(${CONFT_TEST} ${CONFT_SOURCE})
+    target_compile_options(${CONFT_TEST} PUBLIC ${CONFT_FLAGS})
+    
+    target_link_libraries(${CONFT_TEST} ${CONFT_LINK_LIBS})
 
-    add_test(NAME ${test} COMMAND ${test})
+    add_test(NAME ${CONFT_TEST} COMMAND ${CONFT_TEST})
 
-    set_tests_properties(${test} PROPERTIES 
-        PASS_REGULAR_EXPRESSION ${expected}
+    set_tests_properties(${CONFT_TEST} PROPERTIES 
+        PASS_REGULAR_EXPRESSION ${CONFT_EXPECTED}
     ) 
 endfunction(CONFIGURATION_TEST)
 
