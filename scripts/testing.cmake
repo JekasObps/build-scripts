@@ -9,7 +9,21 @@ endfunction(IMPORT_GTEST)
 
 
 # testing effectiveness of configuration flags on the build
-function(CONFIGURATION_TEST test source flags link_libs expected)
+function(CONFIGURATION_TEST 
+    TEST test 
+    SOURCE source 
+    FLAGS flags 
+    LINK_LIBS link_libs 
+    EXPECTED expected
+)
+    if ((NOT "TEST" STREQUAL ${TEST}) OR 
+        (NOT "SOURCE" STREQUAL ${SOURCE}) OR 
+        (NOT "FLAGS" STREQUAL ${FLAGS}) OR
+        (NOT "LINK_LIBS" STREQUAL ${LINK_LIBS}) OR 
+        (NOT "EXPECTED" STREQUAL ${EXPECTED}))
+        message(FATAL_ERROR "Wrong arguments have been passed to a function(CONFIGURATION_TEST)")
+    endif()
+
     add_executable(${test} ${source})
     target_compile_options(${test} PUBLIC ${flags})
     target_link_libraries(${test} ${link_libs})
@@ -68,7 +82,7 @@ function(SETUP_TESTING)
     endif()
 
     foreach(test_source ${test_sources})
-        cmake_path(GET test_source FILENAME test_name)
+        cmake_path(GET test_source STEM test_name)
 
         if(NOT project_test_all)
             CHECK_TEST_ENABLED(${test_name} test_enabled)
