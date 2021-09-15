@@ -61,7 +61,7 @@ function(SETUP_TESTING)
     CHECK_PROJECT_TEST_ENABLED(project_test_all)
 
     # collecting tests 
-    file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+    file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp)
     
     if(project_test_all)
         message(STATUS "\"${PROJECT_NAME}\"  ALL TESTS   ")
