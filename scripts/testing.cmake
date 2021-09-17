@@ -64,6 +64,8 @@ endmacro(__ENABLE_TESTS)
 
 # call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
+    set(multiValueArgs FLAGS)
+    cmake_parse_arguments(SETUP "" "" "${multiValueArgs}" ${ARGN})
     CHECK_PROJECT_TEST_ENABLED(project_test_all)
 
     # collecting tests 
@@ -95,13 +97,14 @@ endfunction(SETUP_TESTING)
 macro(__TEST_SOURCE)
     include(GoogleTest)
     
+    message(STATUS "Add test: ${test_name} ${SETUP_FLAGS}")
     add_executable(${test_name} ${test_source})
+    target_compile_definitions(${test_name} PUBLIC ${SETUP_FLAGS})
     target_link_libraries(${test_name} 
         PRIVATE ${PROJECT_NAME}
         PRIVATE gtest_main
+        PRIVATE gmock
     )
-
-    add_test(NAME ${test_name} COMMAND ${test_name})
 
     gtest_discover_tests(${test_name})
 endmacro(__TEST_SOURCE)
