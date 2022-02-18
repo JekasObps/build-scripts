@@ -10,7 +10,7 @@ macro(CHECK_BUILD)
         set(LINUX True)
     endif()
        
-    ifndef (CMAKE_BUILD_TYPE)
+    if (undefined CMAKE_BUILD_TYPE)
         set CMAKE_BUILD_TYPE Debug
     endif()
     
