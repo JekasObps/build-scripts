@@ -10,8 +10,9 @@ macro(CHECK_BUILD)
         set(LINUX True)
     endif()
        
-    if (undefined CMAKE_BUILD_TYPE)
-        set CMAKE_BUILD_TYPE Debug
+    if (DEFINED CMAKE_BUILD_TYPE)
+    else()
+        set(CMAKE_BUILD_TYPE Debug)
     endif()
     
     # checking build type and setting appropriate flags
