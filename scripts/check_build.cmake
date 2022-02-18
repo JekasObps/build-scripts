@@ -9,7 +9,11 @@ macro(CHECK_BUILD)
         add_definitions(-DLINUX)
         set(LINUX True)
     endif()
-
+       
+    ifndef (CMAKE_BUILD_TYPE)
+        set CMAKE_BUILD_TYPE Debug
+    endif()
+    
     # checking build type and setting appropriate flags
     if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
         message(STATUS "SET DEBUG_MODE")
