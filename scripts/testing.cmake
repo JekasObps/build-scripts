@@ -63,10 +63,10 @@ endmacro(__ENABLE_TESTS)
 
 # Implementing stem function to support 3.18.6 version of cmake
 function(STEM path result)
-    string(find ${path} "/" idx reverse)
-    math(expr idx "${idx} + 1") 
-    string(substring ${path} ${idx} -1 file_name)
-    set(${result} ${file_name} parent_scope)
+    string(FIND ${path} "/" IDX REVERSE)
+    math(EXPR IDX "${IDX} + 1") 
+    string(SUBSTRING ${path} ${IDX} -1 file_name)
+    set(${result} ${file_name} PARENT_SCOPE)
 endfunction(STEM)
 
 # call this inside tests/CMakeLists.txt
