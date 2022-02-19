@@ -61,6 +61,13 @@ macro(__ENABLE_TESTS project tests result)
     set(${result} ${test_targets} PARENT_SCOPE)
 endmacro(__ENABLE_TESTS)
 
+# Implementing stem function to support 3.18.6 version of cmake
+function(STEM path result)
+    string(find ${path} "/" idx reverse)
+    math(expr idx "${idx} + 1") 
+    string(substring ${path} ${idx} -1 file_name)
+    set(${result} ${file_name} parent_scope)
+endfunction(STEM)
 
 # call this inside tests/CMakeLists.txt
 function(SETUP_TESTING)
@@ -76,8 +83,9 @@ function(SETUP_TESTING)
     endif()
 
     foreach(test_source ${test_sources})
-        cmake_path(GET test_source STEM test_name)
-
+        # cmake_path(GET test_source STEM test_name)
+        stem(${test_source} test_name)
+        
         if(NOT project_test_all)
             CHECK_TEST_ENABLED(${test_name} test_enabled)
             if(test_enabled)
